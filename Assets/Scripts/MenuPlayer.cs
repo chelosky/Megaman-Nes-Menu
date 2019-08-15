@@ -9,15 +9,19 @@ public class MenuPlayer : MonoBehaviour
     [Header("Main Icons")]
     [SerializeField] private GameObject selectorGO;
     [SerializeField] private GameObject megamanIcon;
+    [Header("Sound Effect")]
+    [SerializeField] private List<AudioClip> listAudios = new List<AudioClip>();
     [Header("Grid Position")]
     [SerializeField] private int actualPos = 4;
     [Header("Miscellaneous")]
     [SerializeField] private List<Transform> listTransformGrid = new List<Transform>();
     [SerializeField] private List<Sprite> listSpritePlayer = new List<Sprite>();
+    private AudioSource _audioSource;
     private bool enemySelected = false;
     // Start is called before the first frame update
     void Start()
     {
+        this._audioSource = this.GetComponent<AudioSource>();
         this.VerifyResources();
     }
 
@@ -41,6 +45,12 @@ public class MenuPlayer : MonoBehaviour
         if(this.megamanIcon == null){
             this.megamanIcon = this.transform.Find("Player").gameObject;
         }
+        if(this.listAudios.Count == 0){
+            AudioClip sound1 = (AudioClip)Resources.Load("Sounds/MM6_bossSELECTION",typeof(AudioClip));
+            AudioClip sound2 = (AudioClip)Resources.Load("Sounds/MM6_bossSELECTED",typeof(AudioClip));
+            this.listAudios.Add(sound1);
+            this.listAudios.Add(sound2);
+        }
     }
 
     // Update is called once per frame
@@ -51,9 +61,12 @@ public class MenuPlayer : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Return) && this.actualPos != 4){
             this.enemySelected = true;
             this.transform.Find("Selector").GetComponent<Animator>().SetTrigger("EnemySelected");
+            this.PlaySoundEffect(1);
         }
         
         if(this.enemySelected == false){
+            //TEMPORAL POSITION
+            float tmpPos = this.actualPos;
             //VERTICAL INPUT
             float UPMOV = Input.GetKeyDown(KeyCode.UpArrow) ? 1f:0f;
             float DOWNMOV = Input.GetKeyDown(KeyCode.DownArrow) ? -1f:0f;
@@ -83,10 +96,18 @@ public class MenuPlayer : MonoBehaviour
                     this.actualPos -=1;
                 }
             }
-            UpdateSelectorPosition();
-            UpdateMegamanIcon();
+            if(this.actualPos != tmpPos){
+                this.UpdateSelectorPosition();
+                this.UpdateMegamanIcon();
+                this.PlaySoundEffect(0);
+            }
         }
     }
+
+    private void PlaySoundEffect(int value){
+        this._audioSource.PlayOneShot(this.listAudios[value]);
+    }
+
 
     private void UpdateSelectorPosition(){
         this.selectorGO.transform.localPosition = this.listTransformGrid[this.actualPos].localPosition;
