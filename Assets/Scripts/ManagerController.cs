@@ -16,6 +16,7 @@ public class ManagerController : MonoBehaviour
     public static ManagerController instance { get ; private set;} 
     //SINGLETON
     void Awake(){
+        Screen.SetResolution(800, 600, false);
         if(instance == null){
             instance = this;
         }else if(instance != this){
